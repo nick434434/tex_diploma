@@ -1,0 +1,122 @@
+\documentclass[10pt]{beamer}
+\usepackage[russian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\inputencoding{utf8}
+\usepackage{amssymb,amsfonts,amsmath,mathtext,amsthm,mathtools}
+\usepackage{float}
+\usepackage[dvips]{graphicx}
+\usepackage[unicode, pdfborder = {0 0 0}, colorlinks, linkcolor = black]{hyperref}
+\usepackage{sansmathaccent}
+\pdfmapfile{+sansmathaccent.map}
+\usetheme{Frankfurt}
+% \usecolortheme{seahorse}
+\title{Восстановление циклически смазанных изображений с вырожденным смазом}
+\author[Ковалев~Н.~Е.]{Ковалев~Никита~Евгеньевич\\научный руководитель -\\доц., к.ф.-м.н., Козак~Анатолий~Всеволодович}
+\institute[ЮФУ, ИММиКН]{Южный федеральный университет\\ Институт математики, механики и компьютерных наук им. И.И. Воровича}
+\date{Ростов-на-Дону, 2018}
+
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+\newcounter{qcounter}
+
+
+\makeatletter
+\defbeamertemplate*{footline}{my theme}{
+	\leavevmode%
+	\hbox{%
+	\begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+		\usebeamerfont{author in head/foot}%
+		\insertshortauthor~~\beamer@ifempty{\insertshortinstitute}{}{(\insertshortinstitute)}
+	\end{beamercolorbox}%
+	\begin{beamercolorbox}[wd=.7\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+		\usebeamerfont{title in head/foot}\inserttitle
+	\end{beamercolorbox}}%
+}
+\makeatother
+
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+\LARGE{Содержание}
+\large{\tableofcontents}
+\end{frame}
+
+
+\section{Цели работы}
+\begin{frame}
+\begin{block}{\LARGE{Цели работы}}
+\begin{list}{\arabic{qcounter})~}{\usecounter{qcounter}}
+\item Исследовать матрицу смаза, ее свойства
+\item Изучить возможность упрощения задачи восстановления
+\item Найти общий способ восстановления изображений с вырожденным смазом
+\end{list}
+\end{block}
+\end{frame}
+
+
+
+\section{Вспомогательные утверждения}
+\begin{frame}
+\begin{block}{\emph{Матрица горизонтального циклического смаза} (далее - \emph{матрица смаза}) на $k$ пикселей}
+    $$
+    C(n, k) = \frac{1}{k}\begin{pmatrix}
+          \overbrace{1 \hspace*{2mm} \ldots \hspace*{2mm} 1 \hspace*{2mm} 1}^{k} \hspace*{2mm} 0 \hspace*{2mm} \ldots \hspace*{2mm} 0 \\
+          0 \hspace*{2mm} 1 \hspace*{2mm} \ldots \hspace*{2mm} 1 \hspace*{2mm} 1 \hspace*{2mm} \ldots \hspace*{2mm} 0 \\
+          \ldots \hspace*{2mm} \ddots \hspace*{2mm} \ldots \hspace*{2mm} \ddots \hspace*{2mm} \ldots \\
+          1 \hspace*{2mm} \ldots \hspace*{2mm} 0 \hspace*{2mm} 1 \hspace*{2mm} 1 \hspace*{2mm} \ldots \hspace*{2mm} 1 \\
+          \ldots \hspace*{2mm} \ddots \hspace*{2mm} \ldots \hspace*{2mm} \ddots \hspace*{2mm} \ldots\\
+          \underbrace{1 \hspace*{2mm} \ldots \hspace*{2mm} 1}_{k-1} \hspace*{2mm} 0 \hspace*{2mm} 0 \hspace*{2mm} \ldots \hspace*{2mm} 1
+        \end{pmatrix}
+    $$
+\end{block}
+\begin{block}{\emph{Горизонтальный циклический смаз} (далее - \emph{смаз})}
+Умножение изображения на соответствующую матрицу смаза справа есть смаз.
+\end{block}
+\begin{block}{Утверждение.}
+ Матрица смаза всегда представима в виде $FDF^{-1}$, где $D$ - диагональная.
+\end{block}
+
+\end{frame}
+
+
+\section[Метод разбиения]{Метод предобработки в случае большого числа смаза}
+\begin{frame}
+\begin{block}{Подход}
+Главная идея метода - разбить задачу вырожденного смаза на несколько подзадач с невырожденным смазом.
+Пусть $n$ - ширина изображения в пикселах, $k$ - число смаза и $d =$ НОД$(n, k)$. Тогда, если $d > 1$, разобьем изображение на $d$ частей, взяв из $d$ подряд идущих колонок ровно одну в каждую часть.
+
+\end{block}
+
+\end{frame}
+
+
+\section[Метод минимизации]{Метод минимизации погрешности}
+\begin{frame}
+\subsection{Описание проблемы}
+\begin{block}{}
+Матрица $C$ в общем случае может быть необратима. Тогда для восстановления необходимо построить приближение $\tilde{C}$ такое, что $C\tilde{C} \approx E$.
+\end{block}
+
+\begin{block}{}
+Особенности задачи заключаются в наличии большой погрешности (округления и вычислений), возникающей при оцифровке изображений, а также вследствие малых по модулю собственных значений матрицы смаза (плохой обусловленности).
+\end{block}
+
+\begin{block}{}
+Учитывая все вышесказанное, предлагается строить матрицу $\tilde{C}$, используя ее разложение в диагональную и проебразуя собственные числа, лежащие на диагонали получившейся матрицы.
+\end{block}
+
+\end{frame}
+
+
+\end{document}
