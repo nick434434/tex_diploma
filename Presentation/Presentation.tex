@@ -10,11 +10,12 @@
 \usepackage{sansmathaccent}
 \pdfmapfile{+sansmathaccent.map}
 \usetheme{Frankfurt}
+%\usetheme{Madrid}
 % \usecolortheme{seahorse}
 \title{Восстановление циклически смазанных изображений с вырожденным смазом}
 \author[Ковалев~Н.~Е.]{Ковалев~Никита~Евгеньевич\\научный руководитель -\\доц., к.ф.-м.н., Козак~Анатолий~Всеволодович}
-\institute[ЮФУ, ИММиКН]{Южный федеральный университет\\ Институт математики, механики и компьютерных наук им. И.И. Воровича}
-\date{Ростов-на-Дону, 2018}
+\institute[ЮФУ, ИММиКН]{}
+\date{Южный федеральный университет\\ Институт математики, механики и компьютерных наук им. И.И. Воровича\\ \vspace{5mm}Ростов-на-Дону, 2018}
 
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
@@ -55,9 +56,10 @@
 \begin{frame}
 \begin{block}{\LARGE{Цели работы}}
 \begin{list}{\arabic{qcounter})~}{\usecounter{qcounter}}
-\item Исследовать матрицу смаза, ее свойства
-\item Изучить возможность упрощения задачи восстановления
-\item Найти общий способ восстановления изображений с вырожденным смазом
+\item Изучить методы устранения равномерного горизонтального смаза циклической панорамы
+\item Разработать методы восстановления изображений~с большим вырожденным смазом, сведением к минимальному смазу
+\item Разработать метод восстановления изображенийс вырожденным смазом с помощью вариации собственных значений
+\item Для всех разработанных алгоритмов написать программы и провести численные эксперименты
 \end{list}
 \end{block}
 \end{frame}
@@ -65,7 +67,7 @@
 
 
 \section{Вспомогательные утверждения}
-\begin{frame}
+\begin{frame}{Вспомогательные утверждения}
 \begin{block}{\emph{Матрица горизонтального циклического смаза} (далее - \emph{матрица смаза}) на $k$ пикселей}
     $$
     C(n, k) = \frac{1}{k}\begin{pmatrix}
@@ -78,9 +80,7 @@
         \end{pmatrix}
     $$
 \end{block}
-\begin{block}{\emph{Горизонтальный циклический смаз} (далее - \emph{смаз})}
-Умножение изображения на соответствующую матрицу смаза справа есть смаз.
-\end{block}
+
 \begin{block}{Утверждение.}
  Матрица смаза всегда представима в виде $FDF^{-1}$, где $D$ - диагональная.
 \end{block}
@@ -89,7 +89,7 @@
 
 
 \section[Метод разбиения]{Метод предобработки в случае большого числа смаза}
-\begin{frame}
+\begin{frame}{Метод предобработки в случае большого числа смаза}
 \begin{block}{Подход}
 Главная идея метода - разбить задачу вырожденного смаза на несколько подзадач с невырожденным смазом.
 Пусть $n$ - ширина изображения в пикселах, $k$ - число смаза и $d =$ НОД$(n, k)$. Тогда, если $d > 1$, разобьем изображение на $d$ частей, взяв из $d$ подряд идущих колонок ровно одну в каждую часть.
@@ -105,9 +105,9 @@
 
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Обоснование метода и причина смаза результата}
 
-\begin{block}{Причина смаза на $d$ пикселей в результате}
+\begin{block}{}
 
 
 \begin{equation}\label{1}
@@ -126,14 +126,33 @@
 {\Large$\frac{x_2 + x_3 + ... + x_{d+1}}{d}$} - первый пиксель, полученный из пикселя (2).
 
 
-Видно, что в итоге соседние пиксели это среднее арифметическое $d$ соседних пикселей исходного, сдвинутых на 1 при переходе к следующему, то есть смаз с числом смаза $d$
-
 \end{block}
 
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Иллюстрация работы метода на 8-битном изображении}
 \begin{block}{Пример 1}
+\hspace*{-\parindent}
+\begin{minipage}{50mm}
+    \begin{figure}[H]
+            \includegraphics[scale=0.11]{G:/Study/tex_diploma/Pictures/fig5.png}
+            \label{Fig3}
+            \caption[Улучшение при $d$ = 2, $k$~=~242]{Улучшение при $d$ = 2, $k$~=~242}
+        \end{figure}
+\end{minipage}
+\begin{minipage}{50mm}
+  \begin{figure}[H]
+            \includegraphics[scale=0.11]{G:/Study/tex_diploma/Pictures/fig6.png}
+            \label{Fig4}
+            \caption[Улучшение при $d$ = 8, $k$~=~248]{Улучшение при $d$ = 8, $k$~=~248}
+        \end{figure}
+\end{minipage}
+\hfill
+\end{block}
+\end{frame}
+
+\begin{frame}{Иллюстрация работы метода на 16-битном изображении}
+\begin{block}{Пример 2}
 \begin{minipage}{50mm}
     \begin{figure}[H]
             \includegraphics[scale=0.11]{G:/Study/tex_diploma/Pictures/fig3.png}
@@ -157,7 +176,7 @@
 
 
 \section[Метод минимизации]{Метод минимизации погрешности}
-\begin{frame}
+\begin{frame}{Метод минимизации погрешности}
 \begin{block}{Описание проблемы}
 Матрица $C$ в общем случае может быть необратима. Тогда для восстановления необходимо построить приближение $\tilde{C}$ таким образом, что $C\tilde{C}$ приближает единичную матрицу там, где это возможно.
 
@@ -172,7 +191,7 @@
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}{Идея метода}
 
 \begin{block}{О преобразованиях}
 Будем применять к собственным числам линейные преобразования:
@@ -186,7 +205,7 @@
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}{Особенности работы с собственными числами}
 
 \begin{block}{Поправка по умножению}
 Пусть поправка по умножению $\delta_i, i = \overline{0, n-1}$, $C = FDF^{-1}$, $\tilde{C} = F\tilde{D}F^{-1}$, $\tilde{E} = D\tilde{D}$. Тогда $E = diag(\frac{d_0}{d_0\delta_0}, \frac{d_1}{d_1\delta_1}, ...)$ $=$ $diag(\delta_0^{-1}, \delta_1^{-1}, ...)$, где $d$ - вектор собственных чисел матрицы $C$.
@@ -195,7 +214,17 @@
 Восстановление: $(XC)\tilde{C} = XFDF^{-1}F\tilde{D}F^{-1} = XFD\tilde{D}F^{-1} = XF\tilde{E}F^{-1}$. Пусть $R = F\tilde{E}F^{-1}$, тогда $R_{ij} = \frac{1}{n}\Sigma_{k=0}^{n-1} \delta_k^{-1} \xi^{(j-i)k}$, где $\xi = e^{\frac{2\pi}{n}}$.
 \end{block}
 
-\begin{block}{Пояснение о числах на разных диагоналях}
+
+\begin{block}{Поправка по сложению}
+$\tilde{D}~=~diag(\frac{1}{d_0~+~\sigma_0},~\frac{1}{d_1~+~\sigma_1},~...,~\frac{1}{d_{n-1}~+~\sigma_{n-1}})$, где $\sigma$ - вектор значений поправки по сложению. Тогда, положив $\gamma_i = d_i + \sigma_i$, $\tilde{C} = F\tilde{D}F^{-1}$, получим, что $\tilde{C}_{ij} = \frac{1}{n}\Sigma_{k=0}^{n-1} \gamma_k^{-1} \xi^{(j-i)k}$.
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}{Пояснение о числах на разных диагоналях}
+
+\begin{block}{}
 \begin{minipage}{50mm}
     \begin{figure}[H]
             \includegraphics[scale=0.3]{G:/Study/tex_diploma/Pictures/graph1.pdf}
@@ -217,41 +246,53 @@
 \end{frame}
 
 
+\begin{frame}{Иллюстрация восстановления цветного изображения}
 
-\begin{frame}
-
-\begin{minipage}{50mm}
+\begin{block}{Пример 3}
+\hspace*{-\parindent}
+\begin{minipage}{53mm}
     \begin{figure}[H]
-            \includegraphics[scale=0.05]{G:/Study/tex_diploma/Pictures/fig9.png}
-            \label{Pic9}
-            \caption[Восстановление с поправкой по умножению]{Восстановление с поправкой по умножению}
+            \includegraphics[scale=0.27]{G:/Study/tex_diploma/Pictures/fig12.jpg}
+            \label{Pic12}
+            \caption[Смазанное изображение]{Смазанное изображение}
         \end{figure}
 \end{minipage}
-\hfill
 \begin{minipage}{50mm}
     \begin{figure}[H]
-            \includegraphics[scale=0.05]{G:/Study/tex_diploma/Pictures/fig11.png}
-            \label{Pic9}
-            \caption[Восстановление без поправки]{Восстановление без поправки}
+            \includegraphics[scale=0.27]{G:/Study/tex_diploma/Pictures/fig13.jpg}
+            \label{Pic13}
+            \caption[Восстановление с поправкой]{Восстановление с поправкой}
         \end{figure}
 \end{minipage}
-\vspace*{2mm}
-
+\end{block}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Иллюстрация восстановления с поправкой по сложению}
 
+\begin{block}{Пример 4}
 \begin{minipage}{100mm}
   \begin{figure}[H]
-            \includegraphics[scale=0.1]{G:/Study/tex_diploma/Pictures/fig10.png}
+            \includegraphics[scale=0.097]{G:/Study/tex_diploma/Pictures/fig10.png}
             \label{Pic10}
             \caption[Восстановление с применением поправки по сложению]{Восстановление с применением поправки по сложению}
         \end{figure}
 \end{minipage}
 \hfill
-
+\end{block}
 \end{frame}
 
+\begin{frame}
 
+\begin{block}{{\LARGE Полученные результаты}}
+Итогом работы стали два разработанных метода.
+
+
+Первый направлен на уменьшение числа смаза и использует разбиение вырожденно смазанного изображения на несколько подизображений, смазанных невырожденно, их восстановления и склейки обратно. Он позволяет значительно уменьшить смаз и получить в случае достаточно малого $d$ результат, который даже не нужно восстанавливать далее.
+
+
+Второй метод является общим и подходит для любого смаза. Он основан на уменьшении погрешности при восстановлении ценой потери математической точности. Преобразуя линейно собственные числа матрицы смаза, оказывается возможным провести восстановление с практчески полным отображением деталей исходного изображения.
+\end{block}
+
+\end{frame}
 
 \end{document}
